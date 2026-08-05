@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Lizard Button</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            /* Prevents pull-to-refresh and bouncy scrolling on mobile */
+            overscroll-behavior-y: contain; 
+            margin: 0;
+            background-color: black; 
+            font-family: Arial, Helvetica, sans-serif;
+            overflow: hidden; 
+            position: relative;
+        }
+
+        /* 3D Tactile Button Styles */
+        .pushable {
+            position: relative;
+            background: transparent;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            outline-offset: 4px;
+            transition: filter 250ms;
+            z-index: 10;
+            
+            /* Mobile specific properties for a better feel */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .shadow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background: rgba(0, 0, 0, 0.4);
+            will-change: transform;
+            transform: translateY(2px);
+            transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+        }
+
+        .edge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            background: linear-gradient(
+                to left,
+                hsl(0, 100%, 16%) 0%,
+                hsl(0, 100%, 32%) 8%,
+                hsl(0, 100%, 32%) 92%,
+                hsl(0, 100%, 16%) 100%
+            );
+        }
+
+        .front {
+            display: block;
+            position: relative;
+            padding: 24px 42px;
+            border-radius: 12px;
+            font-size: 1.8rem; /* Slightly larger for easier mobile reading */
+            color: white;
+            background: hsl(0, 100%, 47%);
+            will-change: transform;
+            transform: translateY(-8px);
+            transition: transform 600ms cubic-bezier(.3, .7, .4, 1);
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        /* Hover and click physics */
+        .pushable:hover {
+            filter: brightness(110%);
+        }
+
+        .pushable:hover .front {
+            transform: translateY(-12px);
+            transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+        }
+
+        .pushable:active .front {
+            transform: translateY(-2px);
+            transition: transform 34ms;
+        }
+
+        .pushable:hover .shadow {
+            transform: translateY(4px);
+            transition: transform 250ms cubic-bezier(.3, .7, .4, 1.5);
+        }
+
+        .pushable:active .shadow {
+            transform: translateY(1px);
+            transition: transform 34ms;
+        }
+
+        /* Lizard Image Animation Styles */
+        .lizard-clone {
+            position: absolute;
+            bottom: -50%; 
+            left: 50%;
+            transform: translateX(-50%);
+            /* Scales nicely to mobile screens while capping at 400px for tablets */
+            width: 100%;
+            max-width: 400px;
+            z-index: 5;
+            pointer-events: none; 
+            animation: lizardAnim 2s forwards ease-out;
+        }
+
+        /* CSS Animation sequence */
+        @keyframes lizardAnim {
+            0% {
+                bottom: -50%;
+                opacity: 0;
+            }
+            15% {
+                bottom: 0;
+                opacity: 0.6; /* Semi-transparent */
+            }
+            80% {
+                bottom: 0;
+                opacity: 0.6; /* Hold in place semi-transparent */
+            }
+            100% {
+                bottom: 0;
+                opacity: 0; /* Fade away */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- The Interactive Button (ontouchstart added for snappier iOS active states) -->
+    <button class="pushable" id="lizard-btn" ontouchstart="">
+        <span class="shadow"></span>
+        <span class="edge"></span>
+        <span class="front">
+            Push
+        </span>
+    </button>
+
+    <!-- The Logic -->
+    <script>
+        // Use 'pointerdown' instead of 'click' for instantly responsive taps on mobile
+        const btn = document.getElementById('lizard-btn');
+
+        btn.addEventListener('pointerdown', () => {
+            // 1. Create a new audio instance so rapid taps overlap seamlessly
+            const audio = new Audio('lizard-sound.mp3');
+            audio.play().catch(e => console.log("Audio requires user interaction or the file is missing."));
+
+            // 2. Create a new lizard image on the fly
+            const lizardImg = document.createElement('img');
+            lizardImg.src = 'lizard.png';
+            lizardImg.alt = 'Lizard from Elio';
+            lizardImg.className = 'lizard-clone';
+
+            // Add a slight random left/right jitter so rapid taps are visibly overlapping
+            const randomOffset = Math.floor(Math.random() * 60) - 30; 
+            lizardImg.style.marginLeft = `${randomOffset}px`;
+
+            // Add the image to the screen
+            document.body.appendChild(lizardImg);
+
+            // 3. Clean up the HTML by removing the image after the 2-second animation ends
+            setTimeout(() => {
+                lizardImg.remove();
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
